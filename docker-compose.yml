@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+
+  wheretostreamapp:
+    container_name: wheretostream-app
+    image: abdulmuhsin/wheretostream-app:v1
+    hostname: wheretostream-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      GET_HOSTS_FROM: dns
+    networks:
+    - wheretostreamnet
+    volumes:
+    - .:/go/src/wheretostream-app
+    ports:
+    - 8080:8080
+    labels:
+      kompose.service.type: LoadBalancer
+
+networks:
+  wheretostreamnet:
+    driver: bridge
