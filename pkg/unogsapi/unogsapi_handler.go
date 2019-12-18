@@ -36,28 +36,47 @@ func (h *Handlers) Logger(next http.HandlerFunc) http.HandlerFunc {
 }
 
 /*
-HandleSearch gets data from http request and sends to GetAvailability
+HandleSearchByNetflixID gets movies/tv shows from http request and sends to GetAvailability
 */
-func (h *Handlers) HandleSearch(response http.ResponseWriter, request *http.Request) {
+func (h *Handlers) HandleSearchByNetflixID(response http.ResponseWriter, request *http.Request) {
 	//var program string
 	var url = *request.URL
-	programID := url.Query().Get("program_id")
-	fmt.Println(programID)
-	programDetails, err := GetNetflixDetails(programID)
+	netflixID := url.Query().Get("netflix_id")
+	fmt.Println(netflixID)
+	searchDetails, err := GetNetflixDetails(netflixID)
 	if err != nil {
 		h.logger.Printf("Error getting program details: %v", err.Error())
-		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error getting program details", UNOGSResponse{}))
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error getting program details", nil))
 		return
 	}
-	format.Send(response, http.StatusOK, format.Message(true, "Program Details", programDetails.RESULT))
+	format.Send(response, http.StatusOK, format.Message(true, "Program Details", searchDetails.RESULT))
 
 }
 
 /*
-SetupRoutes sets up routes to respective handlers
+HandleSearchByTitle searches for movies/tv shows by name
+*/
+func (h *Handlers) HandleSearchByTitle(response http.ResponseWriter, request *http.Request) {
+	//var program string
+	var url = *request.URL
+	title := url.Query().Get("title")
+	fmt.Println(title)
+	searchResults, err := UNOGSAdvanceSearch(title)
+	if err != nil {
+		h.logger.Printf("Error getting program details: %v", err.Error())
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error getting program details", nil))
+		return
+	}
+	format.Send(response, http.StatusOK, format.Message(true, "Program Details", searchResults))
+
+}
+
+/*
+SetupRoutes links routes to respective handlers
 */
 func (h *Handlers) SetupRoutes(mux *mux.Router) {
-	mux.HandleFunc("/api/unogs/search", h.Logger(h.HandleSearch)).Methods("GET")
+	mux.HandleFunc("/api/unogs/title/details", h.Logger(h.HandleSearchByNetflixID)).Methods("GET")
+	mux.HandleFunc("/api/unogs/search", h.Logger(h.HandleSearchByTitle)).Methods("GET")
 }
 
 /*

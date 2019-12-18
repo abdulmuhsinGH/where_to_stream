@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
+	"time"
 )
 
 // Service provides search adding operations.
@@ -18,13 +20,16 @@ type Service interface {
 NfInfo is netflix info of program
 */
 type nfInfo struct {
-	Image1        string `json:"image1"`
-	Image2        string `json:"image2"`
+	Image1        string `json:"image1" json:"image"`
+	Image2        string `json:"image2" json:"large_image"`
+	Image         string `json:"image"`
+	LargeImage    string `json:"largeimage"`
 	Title         string `json:"title"`
 	Synopsis      string `json:"synopsis"`
 	MatLevel      string `json:"matlevel"`
 	MatLabel      string `json:"matlabel"`
 	AverageRating string `json:"avgrating"`
+	Rating        string `json:"rating"`
 	Type          string `json:"type"`
 	Updated       string `json:"updated"`
 	UNOGSDate     string `json:"unogsdate"`
@@ -75,26 +80,38 @@ type people struct {
 	Directors []string `json:"director"`
 }
 
-// UNOGSResponse desribes the responses body from utelly
+// UNOGSResponse desribes the response body from UNOGS "Load Title Details" api
 type UNOGSResponse struct {
-	RESULT struct{
+	RESULT struct {
 		GenreID   []string  `json:"Genreid"`
 		MgName    []string  `json:"mgname"`
 		ImdbInfo  imdbInfo  `json:"imdbinfo"`
 		NfInfo    nfInfo    `json:"nfinfo"`
 		Countries []country `json:"country"`
-		Peoples []people  `json:"people"`
+		Peoples   []people  `json:"people"`
+	}
+}
+
+// UNOGSAdvanceSearchResponse describes the response body for UNOGS "Advance Search" api
+type UNOGSAdvanceSearchResponse struct {
+	Properties struct {
+		Count struct {
+			Type   string `json:"type"`
+			Format string `json:"format"`
+		} `json:"COUNT"`
+
+		Items []nfInfo `json:"ITEMS"`
 	}
 }
 
 /*
 GetNetflixDetails gets netflix details of a program from uNoGS api
 */
-func GetNetflixDetails(programID string) (UNOGSResponse, error) {
+func GetNetflixDetails(netflixID string) (UNOGSResponse, error) {
 	ugnosRes := UNOGSResponse{}
-	programID = url.PathEscape(programID)
+	netflixID = url.PathEscape(netflixID)
 
-	unogsURL := fmt.Sprintf("https://unogs-unogs-v1.p.rapidapi.com/aaapi.cgi?t=loadvideo&q=%s", programID)
+	unogsURL := fmt.Sprintf("https://unogs-unogs-v1.p.rapidapi.com/aaapi.cgi?t=loadvideo&q=%s", netflixID)
 
 	req, err := http.NewRequest("GET", unogsURL, nil)
 	if err != nil {
@@ -120,5 +137,40 @@ func GetNetflixDetails(programID string) (UNOGSResponse, error) {
 		return UNOGSResponse{}, err
 	}
 	return ugnosRes, nil
+
+}
+
+/*
+UNOGSAdvanceSearch gets netflix details of a program from uNoGS api using the title of a movie/show
+*/
+func UNOGSAdvanceSearch(title string) (UNOGSAdvanceSearchResponse, error) {
+	unogsAdvanceSearchRes := UNOGSAdvanceSearchResponse{}
+	title = url.PathEscape(title)
+	endYear := strconv.Itoa(time.Now().Year())
+
+	unogsURL := fmt.Sprintf("https://unogs-unogs-v1.p.rapidapi.com/aaapi.cgi?q=%s-!1900,%s-!0,5-!0,10-!0-!Any-!Any-!Any-!gt0-!{downloadable}&t=ns&cl=all&st=adv&ob=Relevance&p=1&sa=or", title, endYear)
+
+	req, err := http.NewRequest("GET", unogsURL, nil)
+	if err != nil {
+		return unogsAdvanceSearchRes, err
+	}
+	req.Header.Add("x-rapidapi-host", os.Getenv("RAPI_API_UNOGS_HOST"))
+	req.Header.Add("x-rapidapi-key", os.Getenv("RAPID_API_UNOGS_KEY"))
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return unogsAdvanceSearchRes, err
+	}
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return UNOGSAdvanceSearchResponse{}, err
+	}
+
+	err = json.Unmarshal(body, &unogsAdvanceSearchRes)
+	if err != nil {
+		return UNOGSAdvanceSearchResponse{}, err
+	}
+	return unogsAdvanceSearchRes, nil
 
 }

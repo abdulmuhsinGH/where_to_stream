@@ -54,7 +54,7 @@ func (h *Handlers) HandleSearch(response http.ResponseWriter, request *http.Requ
 }
 
 /*
-SetupRoutes sets up routes to respective handlers
+SetupRoutes links routes to respective handlers
 */
 func (h *Handlers) SetupRoutes(mux *mux.Router) {
 	mux.HandleFunc("/api/utelly/search", h.Logger(h.HandleSearch)).Methods("GET")
