@@ -4,25 +4,18 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"stream_available_on/pkg/format"
+	"where_to_stream/pkg/format"
 	"time"
 
 	"github.com/gorilla/mux"
 )
 
 /*
-Handlers define user
+Handlers with logger
 */
 type Handlers struct {
 	logger *log.Logger
 }
-
-//var searchService Service
-
-/*
-Resp interface for response structure
-*/
-type Resp map[string]interface{}
 
 /*
 Logger handles logs
@@ -49,7 +42,7 @@ func (h *Handlers) HandleSearch(response http.ResponseWriter, request *http.Requ
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error getting program details", UtellyResponse{}))
 		return
 	}
-	format.Send(response, http.StatusOK, format.Message(true, "Progra Details", programDetails))
+	format.Send(response, http.StatusOK, format.Message(true, "Program Details", programDetails))
 
 }
 

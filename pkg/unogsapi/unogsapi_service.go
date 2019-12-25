@@ -14,6 +14,7 @@ import (
 // Service provides search adding operations.
 type Service interface {
 	GetAvailability(string) (UNOGSResponse, error)
+	UNOGSAdvanceSearch(string) (UNOGSAdvanceSearchResponse, error)
 }
 
 /*
@@ -172,5 +173,12 @@ func UNOGSAdvanceSearch(title string) (UNOGSAdvanceSearchResponse, error) {
 		return UNOGSAdvanceSearchResponse{}, err
 	}
 	return unogsAdvanceSearchRes, nil
+
+}
+
+/*
+GetNetflixDetailsForAdvanceSerachResults qwerty keyboard
+*/
+func GetNetflixDetailsForAdvanceSearchResults() {
 
 }
