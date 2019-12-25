@@ -2,6 +2,7 @@ package unogsapi
 
 import (
 	"fmt"
+	"strconv"
 	"log"
 	"net/http"
 	"where_to_stream/pkg/format"
@@ -60,8 +61,16 @@ func (h *Handlers) HandleSearchByTitle(response http.ResponseWriter, request *ht
 	//var program string
 	var url = *request.URL
 	title := url.Query().Get("title")
-	fmt.Println(title)
-	searchResults, err := UNOGSAdvanceSearch(title)
+	skip, _ := strconv.Atoi(url.Query().Get("skip"))
+	limit, _ := strconv.Atoi(url.Query().Get("limit"))
+
+	err := UNOGSAdvanceSearch(title)
+	if err != nil {
+		h.logger.Printf("Error getting program details: %v", err.Error())
+		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error getting program details", nil))
+		return
+	}
+	searchResults, err := GetNetflixDetailsForAdvanceSearchResults(skip, limit)
 	if err != nil {
 		h.logger.Printf("Error getting program details: %v", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error getting program details", nil))
