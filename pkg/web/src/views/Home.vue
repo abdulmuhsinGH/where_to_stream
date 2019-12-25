@@ -44,7 +44,6 @@ import Search from '@/components/Search.vue';
 import ProgramList from '@/components/ProgramList.vue';
 import ProgramListSkeleton from '@/components/ProgramListSkeleton.vue';
 
-import apnf from '../assets/APNF.jpg';
 // import { link } from '@/helpers/http-common';
 
 export default {
@@ -54,7 +53,6 @@ export default {
       isLoading: false,
       apiURL: 'localhost:8080/api/utelly/search',
       searchText: '',
-      a: apnf,
       result: [],
     };
   },
@@ -73,12 +71,12 @@ export default {
         });
         this.isLoading = true;
         const response = await link.get(`/api/utelly/search?program=${this.searchText}`);
-        console.log(response);
+        // console.log(response);
         this.result = response.data.data.results;
         this.isLoading = false;
       } catch (error) {
         this.isLoading = false;
-        console.log(error);
+        // console.log(error);
       }
     },
   },

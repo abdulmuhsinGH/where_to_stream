@@ -70,12 +70,12 @@ export default {
         });
         this.isLoading = true;
         const response = await link.get(`/api/unogs/search?title=${this.searchText}&skip=0&limit=5`);
-        console.log(response);
+        // console.log(response);
         this.result = response.data.data.results;
         this.isLoading = false;
       } catch (error) {
         this.isLoading = false;
-        console.log(error);
+        // console.log(error);
       }
     },
   },
