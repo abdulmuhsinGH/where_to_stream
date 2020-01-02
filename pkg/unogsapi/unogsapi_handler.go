@@ -60,16 +60,19 @@ HandleSearchByTitle searches for movies/tv shows by name
 func (h *Handlers) HandleSearchByTitle(response http.ResponseWriter, request *http.Request) {
 	//var program string
 	var url = *request.URL
+	var err error
 	title := url.Query().Get("title")
 	skip, _ := strconv.Atoi(url.Query().Get("skip"))
 	limit, _ := strconv.Atoi(url.Query().Get("limit"))
-
-	err := UNOGSAdvanceSearch(title)
-	if err != nil {
-		h.logger.Printf("Error getting program details: %v", err.Error())
-		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error getting program details", nil))
-		return
-	}
+	if skip <= 0{
+		err := UNOGSAdvanceSearch(title)
+		if err != nil {
+			h.logger.Printf("Error getting program details: %v", err.Error())
+			format.Send(response, http.StatusInternalServerError, format.Message(false, "Error getting program details", nil))
+			return
+		}
+	}	
+	
 	searchResults, err := GetNetflixDetailsForAdvanceSearchResults(skip, limit)
 	if err != nil {
 		h.logger.Printf("Error getting program details: %v", err.Error())

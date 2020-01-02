@@ -32,6 +32,7 @@ func main() {
 	router := mux.NewRouter()
 	utelly.SetupRoutes(router)
 	unogs.SetupRoutes(router)
+	
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("pkg/web/dist")))
 	srv := server.New(router, "localhost:8080")
 	logger.Println("server starting")

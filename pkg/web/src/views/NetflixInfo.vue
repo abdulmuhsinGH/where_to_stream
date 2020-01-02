@@ -18,16 +18,30 @@
       <v-row justify-center>
         <v-col xs="6" sm="6" md="6" lg="10" xl="10">
           <Search v-model="searchText"/>
+          <v-alert
+            v-model="showAlert"
+            dense
+            dismissible
+            type=alertType
+          >
+            {{alertMessage}}
+          </v-alert>
         </v-col>
         <v-col xs="6" sm="6" md="6" lg="2" xl="2">
           <v-btn
             class="ma-2"
             tile color="primary"
             @click="searchNetflix"
+            v-on:keyup.enter="searchNetflix"
             large
             :disabled="(!searchText || searchText.length < 3) ? true : false">
               Search
           </v-btn>
+        </v-col>
+      </v-row>
+      <v-row justify-center>
+        <v-col v-if="result.length > 0" align-self="center" xs="12" sm="12" md="12" lg="12" xl="12">
+          <v-btn color="success" @click="searchNetflix">See More...</v-btn>
         </v-col>
       </v-row>
     </v-container>
@@ -53,6 +67,9 @@ export default {
       apiURL: 'localhost:8080/api/unogs/search',
       searchText: '',
       result: [],
+      showAlert: false,
+      alertMessage: '',
+      alertType: '',
     };
   },
   components: {
@@ -65,18 +82,30 @@ export default {
   methods: {
     async searchNetflix() {
       try {
+        if (this.searchText.length <= 0) {
+          this.setAlertInfo('Please enter a tv show or movie', 'warning');
+          return;
+        }
         const link = axios.create({
           baseURL: `${process.env.VUE_APP_API_URL}`,
         });
         this.isLoading = true;
-        const response = await link.get(`/api/unogs/search?title=${this.searchText}&skip=0&limit=5`);
-        // console.log(response);
-        this.result = response.data.data.results;
+        const response = await link.get(`/api/unogs/search?title=${this.searchText}&skip=${this.result.length}&limit=4`);
+        this.result = response.data.data;
+        if (this.result.length <= 0) {
+          this.setAlertInfo(`No results found for "${this.searchText}"; try another movie or tv show`, 'warning');
+        }
         this.isLoading = false;
       } catch (error) {
         this.isLoading = false;
-        // console.log(error);
+        this.setAlertInfo('Oops Something Went Wrong :(', 'error');
       }
+    },
+    setAlertInfo(alertMessage, alertType) {
+      console.log('hello');
+      this.alertType = alertType;
+      this.showAlert = true;
+      this.alertMessage = alertMessage;
     },
   },
   watch: {},

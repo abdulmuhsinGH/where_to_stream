@@ -11,7 +11,7 @@
       >
         <v-col class="text-center" cols="12">
           <h1 class="display-1 font-weight-thin mb-4">
-            Amazon Prime and Netflix Info(US and UK locations)</h1>
+            Prime Video and Netflix Info(US and UK locations)</h1>
         </v-col>
       </v-row>
     </v-parallax>
@@ -47,7 +47,7 @@ import ProgramListSkeleton from '@/components/ProgramListSkeleton.vue';
 // import { link } from '@/helpers/http-common';
 
 export default {
-  name: 'home',
+  name: 'primevideoandnetflix',
   data() {
     return {
       isLoading: false,

@@ -69,9 +69,9 @@ type country struct {
 	IsLive        string   `json:"islive"`
 	SeasonDetails []string `json:"seasondet"`
 	Audio         []string `json:"audio"`
-	Subtiles      []string `json:"subs"`
+	Subtiles      dynamic `json:"subs"`
 }
-
+type dynamic interface{}
 /*
 People involved in the program
 */
@@ -150,9 +150,6 @@ UNOGSAdvanceSearch gets netflix details of a program from uNoGS api using the ti
 */
 func UNOGSAdvanceSearch(title string) error {
 
-	if len(UNOGSAdvanceSearchRes.ITEMS) > 0 {
-		return nil
-	}
 	//UNOGSAdvanceSearchRes := UNOGSAdvanceSearchResponse{}
 	title = url.PathEscape(title)
 	endYear := strconv.Itoa(time.Now().Year())
@@ -213,7 +210,7 @@ func loadTitleDetails(id string) (UNOGSResponse, error) {
 	if err != nil {
 		return UNOGSResponse{}, err
 	}
-	fmt.Println(string(body))
+	//fmt.Println(string(body))
 	err = json.Unmarshal(body, &unogsResponse)
 	if err != nil {
 		return UNOGSResponse{}, err
@@ -228,11 +225,12 @@ GetNetflixDetailsForAdvanceSearchResults qwerty keyboard
 func GetNetflixDetailsForAdvanceSearchResults(skip int, limit int) ([]UNOGSResponse, error) {
 	var err error
 	var result UNOGSResponse
-	fmt.Println(len(UNOGSAdvanceSearchRes.ITEMS))
-	fmt.Println(len(NetflixInfoList))
+	if len(UNOGSAdvanceSearchRes.ITEMS) <=0 {
+		return NetflixInfoList, err
+	}
 	for index := 0; index < limit; index++ {
 		item := UNOGSAdvanceSearchRes.ITEMS[skip+index]
-		fmt.Println(item.Title)
+		//fmt.Println(item.Title)
 		result, err = loadTitleDetails(item.NetflixID)
 		if err != nil {
 			//err = err
@@ -243,7 +241,7 @@ func GetNetflixDetailsForAdvanceSearchResults(skip int, limit int) ([]UNOGSRespo
 
 		//NetflixInfoList[skip+index] = result
 	}
-	fmt.Println(len(NetflixInfoList))
+	//fmt.Println(len(NetflixInfoList))
 	return NetflixInfoList, err
 
 }
