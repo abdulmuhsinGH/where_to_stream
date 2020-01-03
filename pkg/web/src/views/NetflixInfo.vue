@@ -3,7 +3,7 @@
     <v-parallax
     height="300"
       dark
-      src="https://cdn.vuetifyjs.com/images/parallax/material.jpg"
+      :src="require('@/assets/material.webp')"
     >
       <v-row
         align="center"
@@ -52,24 +52,23 @@
 
 <script>
 // @ is an alias to /src
-import axios from 'axios';
 import Search from '@/components/Search.vue';
 import NetflixInfoList from '@/components/NetflixInfoList.vue';
 import ProgramListSkeleton from '@/components/ProgramListSkeleton.vue';
 
-// import { link } from '@/helpers/http-common';
+import link from '@/helpers/http-common';
 
 export default {
   name: 'netflixinfo',
   data() {
     return {
       isLoading: false,
-      apiURL: 'localhost:8080/api/unogs/search',
       searchText: '',
       result: [],
       showAlert: false,
       alertMessage: '',
       alertType: '',
+      appUrl: link,
     };
   },
   components: {
@@ -86,28 +85,33 @@ export default {
           this.setAlertInfo('Please enter a tv show or movie', 'warning');
           return;
         }
-        const link = axios.create({
-          baseURL: `${process.env.VUE_APP_API_URL}`,
-        });
         this.isLoading = true;
-        const response = await link.get(`/api/unogs/search?title=${this.searchText}&skip=${this.result.length}&limit=4`);
-        this.result = response.data.data;
-        if (this.result.length <= 0) {
-          this.setAlertInfo(`No results found for "${this.searchText}"; try another movie or tv show`, 'warning');
-        }
+        const response = await this.appUrl.get(`/api/unogs/search?title=${this.searchText}&skip=${this.result.length}&limit=4`);
+        await this.populateResults(response.data.data);
+        this.hasResults();
         this.isLoading = false;
       } catch (error) {
+        console.log(error);
         this.isLoading = false;
         this.setAlertInfo('Oops Something Went Wrong :(', 'error');
       }
     },
     setAlertInfo(alertMessage, alertType) {
-      console.log('hello');
       this.alertType = alertType;
       this.showAlert = true;
       this.alertMessage = alertMessage;
     },
+    hasResults() {
+      if (this.result.length <= 0) {
+        this.setAlertInfo(`No results found for "${this.searchText}"; try another movie or tv show`, 'warning');
+      }
+    },
+    async populateResults(moviesAndOrTvShows) {
+      const vm = this;
+      if (moviesAndOrTvShows) {
+        await moviesAndOrTvShows.forEach(movieAndOrTvShow => vm.result.push(movieAndOrTvShow));
+      }
+    },
   },
-  watch: {},
 };
 </script>

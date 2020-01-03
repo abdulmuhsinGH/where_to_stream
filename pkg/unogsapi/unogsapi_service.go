@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
 	"time"
 )
@@ -69,9 +68,10 @@ type country struct {
 	IsLive        string   `json:"islive"`
 	SeasonDetails []string `json:"seasondet"`
 	Audio         []string `json:"audio"`
-	Subtiles      dynamic `json:"subs"`
+	Subtiles      dynamic  `json:"subs"`
 }
 type dynamic interface{}
+
 /*
 People involved in the program
 */
@@ -108,37 +108,18 @@ func GetNetflixDetails(netflixID string) (UNOGSResponse, error) {
 
 	unogsURL := fmt.Sprintf("https://unogs-unogs-v1.p.rapidapi.com/aaapi.cgi?t=loadvideo&q=%s", netflixID)
 
-	req, err := http.NewRequest("GET", unogsURL, nil)
+	body, err := sendUNOGSAPIRequest(unogsURL)
 	if err != nil {
-		return ugnosRes, err
-	}
-	req.Header.Add("x-rapidapi-host", os.Getenv("RAPI_API_UNOGS_HOST"))
-	req.Header.Add("x-rapidapi-key", os.Getenv("RAPID_API_UNOGS_KEY"))
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return ugnosRes, err
-	}
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		fmt.Println("e")
 		return UNOGSResponse{}, err
 	}
 
 	err = json.Unmarshal(body, &ugnosRes)
 	if err != nil {
-		fmt.Println("r")
 		return UNOGSResponse{}, err
 	}
 	return ugnosRes, nil
 
 }
-
-/*
-NetflixInfoList contains the list of tv shows and movies searched
-*/
-var NetflixInfoList []UNOGSResponse
 
 /*
 UNOGSAdvanceSearchRes contains the list of tv shows and movies searched
@@ -156,19 +137,7 @@ func UNOGSAdvanceSearch(title string) error {
 
 	unogsURL := fmt.Sprintf("https://unogs-unogs-v1.p.rapidapi.com/aaapi.cgi?q=%s-!1900,%s-!0,5-!0,10-!0-!Any-!Any-!Any-!gt0-!{downloadable}&t=ns&cl=all&st=adv&ob=Relevance&p=1&sa=or", title, endYear)
 
-	req, err := http.NewRequest("GET", unogsURL, nil)
-	if err != nil {
-		return err
-	}
-	req.Header.Add("x-rapidapi-host", os.Getenv("RAPI_API_UNOGS_HOST"))
-	req.Header.Add("x-rapidapi-key", os.Getenv("RAPID_API_UNOGS_KEY"))
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := sendUNOGSAPIRequest(unogsURL)
 	if err != nil {
 		return err
 	}
@@ -178,39 +147,41 @@ func UNOGSAdvanceSearch(title string) error {
 		return err
 	}
 
-	count, err := strconv.Atoi(UNOGSAdvanceSearchRes.COUNT)
-	if err != nil {
-		return err
-	}
-	NetflixInfoList = make([]UNOGSResponse, 0, count)
-
 	return nil
 
 }
 
-func loadTitleDetails(id string) (UNOGSResponse, error) {
-
-	unogsResponse := UNOGSResponse{}
-	id = url.PathEscape(id)
-
-	loadTitleDetailsURL := fmt.Sprintf("https://unogs-unogs-v1.p.rapidapi.com/aaapi.cgi?t=loadvideo&q=%s", id)
-
-	req, _ := http.NewRequest("GET", loadTitleDetailsURL, nil)
+func sendUNOGSAPIRequest(url string) ([]byte, error) {
+	req, _ := http.NewRequest("GET", url, nil)
 
 	req.Header.Add("x-rapidapi-host", "unogs-unogs-v1.p.rapidapi.com")
 	req.Header.Add("x-rapidapi-key", "2e0d42725bmsh79c17c1f201821ap1c4a09jsn000efd2c9143")
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return UNOGSResponse{}, err
+		return nil, err
 	}
 
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
+		return nil, err
+	}
+
+	return body, nil
+}
+
+func loadTitleDetails(id string) (UNOGSResponse, error) {
+	unogsResponse := UNOGSResponse{}
+	id = url.PathEscape(id)
+
+	titleDetailsURL := fmt.Sprintf("https://unogs-unogs-v1.p.rapidapi.com/aaapi.cgi?t=loadvideo&q=%s", id)
+
+	body, err := sendUNOGSAPIRequest(titleDetailsURL)
+	if err != nil {
 		return UNOGSResponse{}, err
 	}
-	//fmt.Println(string(body))
+
 	err = json.Unmarshal(body, &unogsResponse)
 	if err != nil {
 		return UNOGSResponse{}, err
@@ -223,25 +194,25 @@ func loadTitleDetails(id string) (UNOGSResponse, error) {
 GetNetflixDetailsForAdvanceSearchResults qwerty keyboard
 */
 func GetNetflixDetailsForAdvanceSearchResults(skip int, limit int) ([]UNOGSResponse, error) {
+	var netflixInfoList []UNOGSResponse
 	var err error
 	var result UNOGSResponse
-	if len(UNOGSAdvanceSearchRes.ITEMS) <=0 {
-		return NetflixInfoList, err
+	if len(UNOGSAdvanceSearchRes.ITEMS) <= 0 {
+		return netflixInfoList, err
+	}
+	resultsRemainder := len(UNOGSAdvanceSearchRes.ITEMS) - skip
+	if resultsRemainder < limit {
+		limit = resultsRemainder
 	}
 	for index := 0; index < limit; index++ {
 		item := UNOGSAdvanceSearchRes.ITEMS[skip+index]
-		//fmt.Println(item.Title)
 		result, err = loadTitleDetails(item.NetflixID)
 		if err != nil {
-			//err = err
-			//fmt.Println(err.Error())
 			break
 		}
-		NetflixInfoList = append(NetflixInfoList, result)
-
-		//NetflixInfoList[skip+index] = result
+		netflixInfoList = append(netflixInfoList, result)
 	}
-	//fmt.Println(len(NetflixInfoList))
-	return NetflixInfoList, err
+
+	return netflixInfoList, err
 
 }

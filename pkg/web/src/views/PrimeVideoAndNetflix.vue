@@ -3,7 +3,7 @@
     <v-parallax
       height="300"
       dark
-      src="https://cdn.vuetifyjs.com/images/parallax/material2.jpg"
+      :src="require('@/assets/material2.jpg')"
     >
       <v-row
         align="center"
@@ -11,7 +11,7 @@
       >
         <v-col class="text-center" cols="12">
           <h1 class="display-1 font-weight-thin mb-4">
-            Prime Video and Netflix Info(US and UK locations)</h1>
+            Prime Video and Netflix Info(US and UK only)</h1>
         </v-col>
       </v-row>
     </v-parallax>
@@ -33,32 +33,30 @@
       </v-row>
     </v-container>
     <program-list-skeleton v-if="isLoading"></program-list-skeleton>
-    <program-list :list="result" v-else ></program-list>
+    <prime-video-and-netflix-list :list="result" v-else ></prime-video-and-netflix-list>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import axios from 'axios';
 import Search from '@/components/Search.vue';
-import ProgramList from '@/components/ProgramList.vue';
+import PrimeVideoAndNetflixList from '@/components/PrimeVideoAndNetflixList.vue';
 import ProgramListSkeleton from '@/components/ProgramListSkeleton.vue';
 
-// import { link } from '@/helpers/http-common';
+import link from '@/helpers/http-common';
 
 export default {
   name: 'primevideoandnetflix',
   data() {
     return {
       isLoading: false,
-      apiURL: 'localhost:8080/api/utelly/search',
       searchText: '',
       result: [],
     };
   },
   components: {
     Search,
-    ProgramList,
+    PrimeVideoAndNetflixList,
     ProgramListSkeleton,
   },
   mounted() {
@@ -66,9 +64,6 @@ export default {
   methods: {
     async searchUtelly() {
       try {
-        const link = axios.create({
-          baseURL: `${process.env.VUE_APP_API_URL}`,
-        });
         this.isLoading = true;
         const response = await link.get(`/api/utelly/search?program=${this.searchText}`);
         // console.log(response);

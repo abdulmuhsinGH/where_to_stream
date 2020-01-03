@@ -20,6 +20,11 @@ export default {
   components: {
     NetflixInfoCard,
   },
+  data() {
+    return {
+      count: 0,
+    };
+  },
 };
 </script>
 

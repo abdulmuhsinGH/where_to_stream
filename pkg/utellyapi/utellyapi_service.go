@@ -54,28 +54,36 @@ func GetAvailability(program string) (UtellyResponse, error) {
 	program = url.PathEscape(program)	
 	utellyURL := fmt.Sprintf("https://utelly-tv-shows-and-movies-availability-v1.p.rapidapi.com/lookup?term=%s", program)
 
-	req, err := http.NewRequest("GET", utellyURL, nil)
+	body, err := sendUtellyAPIRequest(utellyURL)
 	if err != nil {
-		return utellyRes, err
+		return UtellyResponse{}, err
+	}
+	err = json.Unmarshal(body, &utellyRes)
+	if err != nil {
+		return UtellyResponse{}, err
+	}
+	return utellyRes, nil
+
+}
+
+func sendUtellyAPIRequest(url string) ([]byte, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
 	}
 	req.Header.Add("x-rapidapi-host", os.Getenv("RAPI_API_UTELLY_HOST"))
 	req.Header.Add("x-rapidapi-key", os.Getenv("RAPID_API_UTELLY_KEY"))
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return utellyRes, err
+		return nil, err
 	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println("e")
-		return UtellyResponse{}, err
+		return nil, err
 	}
-	err = json.Unmarshal(body, &utellyRes)
-	if err != nil {
-		fmt.Println("r")
-		return UtellyResponse{}, err
-	}
-	return utellyRes, nil
 
+	return body, nil
 }

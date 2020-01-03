@@ -28,20 +28,12 @@
       </v-list-item>
     </v-list>
     <v-divider></v-divider>
-    <v-card-actions>
-      <v-btn
-        color="orange"
-        text
-      >
-        See More Details
-      </v-btn>
-    </v-card-actions>
   </v-card>
 </template>
 
 <script>
 export default {
-  name: 'ProgramCard',
+  name: 'PrimeVideoAndNetflixCard',
   props: {
     data: Object,
   },
