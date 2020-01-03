@@ -7,7 +7,7 @@
       :alt="data.RESULT.nfinfo.title"
       :aspect-ratio="16/9"
       class="white--text align-end"
-      :src="data.RESULT.nfinfo.image2"
+      :src="data.RESULT.nfinfo.image1"
     >
       <v-card-title>{{data.RESULT.nfinfo.title}}</v-card-title>
     </v-img>

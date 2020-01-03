@@ -39,14 +39,16 @@
           </v-btn>
         </v-col>
       </v-row>
+    </v-container>
+    <netflix-info-list :list="result"></netflix-info-list>
+    <program-list-skeleton v-if="isLoading"></program-list-skeleton>
+    <v-container grid-list-xs>
       <v-row justify-center>
         <v-col v-if="result.length > 0" align-self="center" xs="12" sm="12" md="12" lg="12" xl="12">
           <v-btn color="success" @click="searchNetflix">See More...</v-btn>
         </v-col>
       </v-row>
     </v-container>
-    <program-list-skeleton v-if="isLoading"></program-list-skeleton>
-    <netflix-info-list :list="result" v-else ></netflix-info-list>
   </div>
 </template>
 
