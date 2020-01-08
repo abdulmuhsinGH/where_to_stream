@@ -31,8 +31,7 @@
           <v-btn
             class="ma-2"
             tile color="primary"
-            @click="searchNetflix"
-            v-on:keyup.enter="searchNetflix"
+            @click="newSearchNetflix"
             large
             :disabled="(!searchText || searchText.length < 3) ? true : false">
               Search
@@ -97,6 +96,10 @@ export default {
         this.isLoading = false;
         this.setAlertInfo('Oops Something Went Wrong :(', 'error');
       }
+    },
+    async newSearchNetflix() {
+      this.result = [];
+      await this.searchNetflix();
     },
     setAlertInfo(alertMessage, alertType) {
       this.alertType = alertType;
