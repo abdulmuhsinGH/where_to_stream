@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"os"
 	"where_to_stream/pkg/server"
 	"where_to_stream/pkg/unogsapi"
@@ -32,9 +31,13 @@ func main() {
 	router := mux.NewRouter()
 	utelly.SetupRoutes(router)
 	unogs.SetupRoutes(router)
-	
-	router.PathPrefix("/").Handler(http.FileServer(http.Dir("pkg/web/dist")))
-	srv := server.New(router, "localhost:8080")
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	srv := server.New(router, "localhost:"+port)
 	logger.Println("server starting")
 	err = srv.ListenAndServe()
 	if err != nil {

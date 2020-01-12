@@ -1,12 +1,12 @@
 .DS_Store
-pkg/web/node_modules
-pkg/web/dist
+web/node_modules
+web/dist
 
 # local env files
 .env.local
 .env.*.local
 .env
-pkg/web/.env
+web/.env
 
 # Log files
 npm-debug.log*

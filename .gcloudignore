@@ -24,5 +24,4 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-pkg/web/node_modules
-public
+web

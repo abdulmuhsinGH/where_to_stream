@@ -13,4 +13,5 @@
 # limitations under the License.
 
 runtime: go113 # replace with go111 for Go 1.11
+service: backend
 main: ./cmd/app/main.go 
