@@ -65,13 +65,7 @@ export default {
     async searchUtelly() {
       try {
         this.isLoading = true;
-        const response = await link.get(`/api/utelly/search?program=${this.searchText}`, {
-          headers: {
-            'Access-Control-Allow-Origin': `${process.env.VUE_APP_API_URL}`,
-            'Access-Control-Allow-Methods' : 'GET',
-            'Content-Type': 'application/json',
-          },
-        });
+        const response = await link.get(`/api/utelly/search?program=${this.searchText}`);
         // console.log(response);
         this.result = response.data.data.results;
         this.isLoading = false;

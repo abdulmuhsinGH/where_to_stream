@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	fs := http.FileServer(http.Dir("dist"))
+	fs := http.FileServer(http.Dir("where_to_stream/web/dist"))
   	http.Handle("/", fs)
 
 	// [START setting_port]

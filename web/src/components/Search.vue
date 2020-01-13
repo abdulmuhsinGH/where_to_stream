@@ -7,7 +7,6 @@
       <v-flex xs12>
         <v-text-field
           dense
-          autofocus
           outlined
           clearable
           label="Search TV Show/Movie"
