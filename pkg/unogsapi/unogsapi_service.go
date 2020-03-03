@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"time"
 )
@@ -153,9 +154,9 @@ func UNOGSAdvanceSearch(title string) error {
 
 func sendUNOGSAPIRequest(url string) ([]byte, error) {
 	req, _ := http.NewRequest("GET", url, nil)
-
-	req.Header.Add("x-rapidapi-host", "unogs-unogs-v1.p.rapidapi.com")
-	req.Header.Add("x-rapidapi-key", "2e0d42725bmsh79c17c1f201821ap1c4a09jsn000efd2c9143")
+	
+	req.Header.Add("x-rapidapi-host", os.Getenv("RAPI_API_UNOGS_HOST"))
+	req.Header.Add("x-rapidapi-key", os.Getenv("RAPID_API_UNOGS_KEY"))
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
