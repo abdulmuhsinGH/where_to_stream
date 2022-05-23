@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"where_to_stream/pkg/format"
 	"time"
+	"where_to_stream/pkg/format"
 
 	"github.com/gorilla/mux"
 )

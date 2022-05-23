@@ -154,7 +154,7 @@ func UNOGSAdvanceSearch(title string) error {
 
 func sendUNOGSAPIRequest(url string) ([]byte, error) {
 	req, _ := http.NewRequest("GET", url, nil)
-	
+
 	req.Header.Add("x-rapidapi-host", os.Getenv("RAPI_API_UNOGS_HOST"))
 	req.Header.Add("x-rapidapi-key", os.Getenv("RAPID_API_UNOGS_KEY"))
 
