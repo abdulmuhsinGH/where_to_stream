@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"net/url"
+	"os"
 )
 
 // Service provides search adding operations.
@@ -30,7 +30,7 @@ Result describes the response result for a program search
 */
 type Result struct {
 	Name      string `json:"name"`
-	Weight    int `json:"weight"`
+	Weight    int    `json:"weight"`
 	ID        string `json:"id"`
 	Picture   string `json:"picture"`
 	Locations []Location
@@ -42,7 +42,7 @@ type UtellyResponse struct {
 	StatusCode int      `json:"status_code"`
 	Term       string   `json:"term"`
 	Results    []Result `json:"results"`
-	Updated string `json:"updated"`
+	Updated    string   `json:"updated"`
 }
 
 /*
@@ -51,7 +51,7 @@ GetAvailability searches the utelly api for show availability
 func GetAvailability(program string) (UtellyResponse, error) {
 	utellyRes := UtellyResponse{}
 
-	program = url.PathEscape(program)	
+	program = url.PathEscape(program)
 	utellyURL := fmt.Sprintf("https://utelly-tv-shows-and-movies-availability-v1.p.rapidapi.com/lookup?term=%s", program)
 
 	body, err := sendUtellyAPIRequest(utellyURL)
