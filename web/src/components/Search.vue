@@ -21,7 +21,7 @@
 
 <script>
 export default {
-  name: 'Search',
+  name: 'SearchMedia',
   props: ['value'],
   data: () => ({}),
 };

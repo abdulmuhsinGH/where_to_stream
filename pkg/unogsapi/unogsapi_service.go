@@ -7,148 +7,140 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
-	"time"
 )
 
 // Service provides search adding operations.
 type Service interface {
-	GetAvailability(string) (UNOGSResponse, error)
+	GetAvailability(string) (TitleResponse, error)
 	UNOGSAdvanceSearch(string) error
 }
 
 /*
 NfInfo is netflix info of program
 */
-type nfInfo struct {
-	Image1        string `json:"image1" json:"image"`
-	Image2        string `json:"image2" json:"large_image"`
-	Image         string `json:"image"`
-	LargeImage    string `json:"largeimage"`
-	Title         string `json:"title"`
-	Synopsis      string `json:"synopsis"`
-	MatLevel      string `json:"matlevel"`
-	MatLabel      string `json:"matlabel"`
-	AverageRating string `json:"avgrating"`
-	Rating        string `json:"rating"`
-	Type          string `json:"type"`
-	Updated       string `json:"updated"`
-	UNOGSDate     string `json:"unogsdate"`
-	Released      string `json:"released"`
-	NetflixID     string `json:"netflixid"`
-	Runtime       string `json:"runtime"`
-	Download      string `json:"download"`
-}
-
-/*
-ImdbInfo imdb info of program
-*/
-type imdbInfo struct {
-	Runtime   string `json:"runtime"`
-	Plot      string `json:"plot"`
-	Language  string `json:"language"`
-	IMDBID    string `json:"imdbid"`
-	Country   string `json:"country"`
-	Awards    string `json:"awards"`
-	Genre     string `json:"genre"`
-	Metascore string `json:"metascore"`
-	Votes     string `json:"votes"`
+type TitleInfo struct {
+	Title     string `json:"title"`
+	Img       string `json:"img"`
+	TitleType string `json:"title_type"`
+	NetflixID int    `json:"netflix_id"`
+	Synopsis  string `json:"synopsis"`
 	Rating    string `json:"rating"`
+	Year      string `json:"year"`
+	Runtime   string `json:"runtime"`
+	ImdbID    string `json:"imdb_id"`
+	Poster    string `json:"poster"`
+	Top250    int    `json:"top250"`
+	Top250Tv  int    `json:"top250tv"`
+	TitleDate string `json:"title_date"`
 }
 
 /*
 Country details of program
 */
-type country struct {
-	Name          string   `json:"country"`
-	CCode         string   `json:"ccode"`
-	Seasons       string   `json:"seasons"`
-	Expires       string   `json:"expires"`
-	New           string   `json:"new"`
-	CID           string   `json:"cid"`
-	IsLive        string   `json:"islive"`
-	SeasonDetails []string `json:"seasondet"`
-	Audio         []string `json:"audio"`
-	Subtiles      dynamic  `json:"subs"`
-}
-type dynamic interface{}
-
-/*
-People involved in the program
-*/
-type people struct {
-	Actors    []string `json:"actor"`
-	Creators  []string `json:"creator"`
-	Directors []string `json:"director"`
+type Country struct {
+	CountryCode  string `json:"country_code"`
+	Country      string `json:"country"`
+	SeasonDetail string `json:"season_detail"`
+	ExpireDate   string `json:"expire_date"`
+	NewDate      string `json:"new_date"`
+	Audio        string `json:"audio"`
+	Subtitle     string `json:"subtitle"`
 }
 
-// UNOGSResponse desribes the response body from UNOGS "Load Title Details" api
-type UNOGSResponse struct {
-	RESULT struct {
-		GenreID []string `json:"Genreid"`
-		MgName  []string `json:"mgname"`
-		//ImdbInfo  imdbInfo  `json:"imdbinfo"`
-		NfInfo    nfInfo    `json:"nfinfo"`
-		Countries []country `json:"country"`
-		Peoples   []people  `json:"people"`
-	}
+type CountryResponse struct {
+	Object struct {
+		Limit  int `json:"limit"`
+		Offset int `json:"offset"`
+		Total  int `json:"total"`
+	} `json:"object"`
+	Results []Country `json:"results"`
 }
 
-// UNOGSAdvanceSearchResponse describes the response body for UNOGS "Advance Search" api
-type UNOGSAdvanceSearchResponse struct {
-	COUNT string   `json:"COUNT"`
-	ITEMS []nfInfo `json:"ITEMS"`
+type TitleDetails struct {
+	Title         string `json:"title"`
+	MaturityLabel string `json:"maturity_label"`
+	MaturityLevel string `json:"maturity_level"`
+	Synopsis      string `json:"synopsis"`
+	TitleType     string `json:"title_type"`
+	DefaultImage  string `json:"default_image"`
+	LargeImage    string `json:"large_image"`
+	NetflixID     string `json:"netflix_id"`
+	StartDate     string `json:"start_date"`
+	LatestDate    string `json:"latest_date"`
+	Year          string `json:"year"`
+	Poster        string `json:"poster"`
+	Runtime       string `json:"runtime"`
+	Awards        string `json:"awards"`
+	OriginCountry string `json:"origin_country"`
+	Rating        string `json:"rating"`
+	AltID         string `json:"alt_id"`
+	AltPlot       string `json:"alt_plot"`
+	AltMetascore  string `json:"alt_metascore"`
+	AltVotes      string `json:"alt_votes"`
+	AltRuntime    string `json:"alt_runtime"`
+	AltImage      string `json:"alt_image"`
+}
+
+type TitleInfoResponse struct {
+	Object struct {
+		Limit  int `json:"limit"`
+		Offset int `json:"offset"`
+		Total  int `json:"total"`
+	} `json:"object"`
+	Results []TitleInfo `json:"results"`
+}
+
+type TitleResponse struct {
+	Details   TitleDetails `json:"details"`
+	Countries []Country    `json:"countries"`
 }
 
 /*
 GetNetflixDetails gets netflix details of a program from uNoGS api
 */
-func GetNetflixDetails(netflixID string) (UNOGSResponse, error) {
-	ugnosRes := UNOGSResponse{}
+func GetNetflixDetails(netflixID string) (TitleDetails, error) {
+	titleDetails := TitleDetails{}
 	netflixID = url.PathEscape(netflixID)
-
-	unogsURL := fmt.Sprintf("https://unogs-unogs-v1.p.rapidapi.com/aaapi.cgi?t=loadvideo&q=%s", netflixID)
+	UNOGSBaseURL := os.Getenv("RAPI_API_UNOGS_HOST")
+	unogsURL := fmt.Sprintf("https://%s/title/details?netflix_id=%s", UNOGSBaseURL, netflixID)
 
 	body, err := sendUNOGSAPIRequest(unogsURL)
 	if err != nil {
-		return UNOGSResponse{}, err
+		return TitleDetails{}, err
 	}
 
-	err = json.Unmarshal(body, &ugnosRes)
+	err = json.Unmarshal(body, &titleDetails)
 	if err != nil {
-		return UNOGSResponse{}, err
+		return TitleDetails{}, err
 	}
-	return ugnosRes, nil
+	return titleDetails, nil
 
 }
 
 /*
-UNOGSAdvanceSearchRes contains the list of tv shows and movies searched
-*/
-var UNOGSAdvanceSearchRes UNOGSAdvanceSearchResponse
-
-/*
 UNOGSAdvanceSearch gets netflix details of a program from uNoGS api using the title of a movie/show
 */
-func UNOGSAdvanceSearch(title string) error {
+func TitleDetailsSearch(title string, skip int, limit int) (TitleInfoResponse, error) {
 
-	//UNOGSAdvanceSearchRes := UNOGSAdvanceSearchResponse{}
+	var titleInfoResponse TitleInfoResponse
 	title = url.PathEscape(title)
-	endYear := strconv.Itoa(time.Now().Year())
+	//endYear := strconv.Itoa(time.Now().Year())
 
-	unogsURL := fmt.Sprintf("https://unogs-unogs-v1.p.rapidapi.com/aaapi.cgi?q=%s-!1900,%s-!0,5-!0,10-!0-!Any-!Any-!Any-!gt0-!{downloadable}&t=ns&cl=all&st=adv&ob=Relevance&p=1&sa=or", title, endYear)
+	UNOGSBaseURL := os.Getenv("RAPI_API_UNOGS_HOST")
 
-	body, err := sendUNOGSAPIRequest(unogsURL)
+	unogsAdvanceSearchURL := fmt.Sprintf("https://%s/search/titles??limit=%d&offset=%d&order_by=date&title=%s", UNOGSBaseURL, limit, skip, title)
+
+	body, err := sendUNOGSAPIRequest(unogsAdvanceSearchURL)
 	if err != nil {
-		return err
+		return TitleInfoResponse{}, err
 	}
 
-	err = json.Unmarshal(body, &UNOGSAdvanceSearchRes)
+	err = json.Unmarshal(body, &titleInfoResponse)
 	if err != nil {
-		return err
+		return TitleInfoResponse{}, err
 	}
 
-	return nil
+	return titleInfoResponse, nil
 
 }
 
@@ -172,48 +164,47 @@ func sendUNOGSAPIRequest(url string) ([]byte, error) {
 	return body, nil
 }
 
-func loadTitleDetails(id string) (UNOGSResponse, error) {
-	unogsResponse := UNOGSResponse{}
-	id = url.PathEscape(id)
-
-	titleDetailsURL := fmt.Sprintf("https://unogs-unogs-v1.p.rapidapi.com/aaapi.cgi?t=loadvideo&q=%s", id)
+func loadTitleDetails(id int) (TitleResponse, error) {
+	titleResponse := TitleResponse{}
+	countryResponse := CountryResponse{}
+	UNOGSBaseURL := os.Getenv("RAPI_API_UNOGS_HOST")
+	titleDetailsURL := fmt.Sprintf("https://%s/title/details?netflix_id=%d", UNOGSBaseURL, id)
+	titleCountriesURL := fmt.Sprintf("https://%s/title/countries?netflix_id=%d", UNOGSBaseURL, id)
 
 	body, err := sendUNOGSAPIRequest(titleDetailsURL)
 	if err != nil {
-		return UNOGSResponse{}, err
+		return TitleResponse{}, err
+	}
+	err = json.Unmarshal(body, &titleResponse.Details)
+	if err != nil {
+		return TitleResponse{}, err
 	}
 
-	err = json.Unmarshal(body, &unogsResponse)
+	countriesRes, err := sendUNOGSAPIRequest(titleCountriesURL)
 	if err != nil {
-		return UNOGSResponse{}, err
+		return TitleResponse{}, err
 	}
-	return unogsResponse, nil
+
+	err = json.Unmarshal(countriesRes, &countryResponse)
+	if err != nil {
+		return TitleResponse{}, err
+	}
+	titleResponse.Countries = countryResponse.Results
+
+	return titleResponse, nil
 
 }
 
 /*
 GetNetflixDetailsForAdvanceSearchResults qwerty keyboard
 */
-func GetNetflixDetailsForAdvanceSearchResults(skip int, limit int) ([]UNOGSResponse, error) {
-	var netflixInfoList []UNOGSResponse
-	var err error
-	var result UNOGSResponse
-	if len(UNOGSAdvanceSearchRes.ITEMS) <= 0 {
-		return netflixInfoList, err
-	}
-	resultsRemainder := len(UNOGSAdvanceSearchRes.ITEMS) - skip
-	if resultsRemainder < limit {
-		limit = resultsRemainder
-	}
-	for index := 0; index < limit; index++ {
-		item := UNOGSAdvanceSearchRes.ITEMS[skip+index]
-		result, err = loadTitleDetails(item.NetflixID)
-		if err != nil {
-			break
-		}
-		netflixInfoList = append(netflixInfoList, result)
+func GetNetflixTitleDetails(netflixID int) (TitleResponse, error) {
+
+	result, err := loadTitleDetails(netflixID)
+	if err != nil {
+		return TitleResponse{}, err
 	}
 
-	return netflixInfoList, err
+	return result, nil
 
 }

@@ -1,7 +1,7 @@
 <template>
   <v-container>
       <v-row >
-        <v-col v-bind:key="item.RESULT.nfinfo.netflixid"
+        <v-col v-bind:key="item.netflix_id"
           v-for="item in list" xs="12" sm="12" md="4" lg="4" xl="4">
           <NetflixInfoCard :data="item" />
         </v-col>

@@ -17,7 +17,7 @@
     <v-container>
       <v-row justify-center>
         <v-col xs="6" sm="6" md="6" lg="10" xl="10">
-          <Search v-model="searchText"/>
+          <SearchMedia v-model="searchText"/>
           <v-alert
             v-model="showAlert"
             dense
@@ -33,7 +33,7 @@
             tile color="primary"
             @click="newSearchNetflix"
             large
-            :disabled="(!searchText || searchText.length < 3) ? true : false">
+            :disabled="(!searchText || searchText.length < 2) ? true : false">
               Search
           </v-btn>
         </v-col>
@@ -53,14 +53,14 @@
 
 <script>
 // @ is an alias to /src
-import Search from '@/components/Search.vue';
+import SearchMedia from '@/components/Search.vue';
 import NetflixInfoList from '@/components/NetflixInfoList.vue';
 import ProgramListSkeleton from '@/components/ProgramListSkeleton.vue';
 
 import link from '@/helpers/http-common';
 
 export default {
-  name: 'netflixinfo',
+  name: 'netflix-info',
   data() {
     return {
       isLoading: false,
@@ -73,7 +73,7 @@ export default {
     };
   },
   components: {
-    Search,
+    SearchMedia,
     NetflixInfoList,
     ProgramListSkeleton,
   },
@@ -88,7 +88,7 @@ export default {
         }
         this.isLoading = true;
         const response = await this.appUrl.get(`/api/unogs/search?title=${this.searchText}&skip=${this.result.length}&limit=4`);
-        await this.populateResults(response.data.data);
+        await this.populateResults(response.data.data.results);
         this.hasResults();
         this.isLoading = false;
       } catch (error) {
@@ -114,7 +114,7 @@ export default {
     async populateResults(moviesAndOrTvShows) {
       const vm = this;
       if (moviesAndOrTvShows) {
-        await moviesAndOrTvShows.forEach(movieAndOrTvShow => vm.result.push(movieAndOrTvShow));
+        vm.result = vm.result.concat(moviesAndOrTvShows);
       }
     },
   },

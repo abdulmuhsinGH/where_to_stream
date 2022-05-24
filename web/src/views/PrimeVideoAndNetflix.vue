@@ -18,7 +18,7 @@
     <v-container>
       <v-row justify-center>
         <v-col xs="6" sm="6" md="6" lg="10" xl="10">
-          <Search v-model="searchText"/>
+          <SearchMedia v-model="searchText"/>
         </v-col>
         <v-col xs="6" sm="6" md="6" lg="2" xl="2">
           <v-btn
@@ -39,14 +39,14 @@
 
 <script>
 // @ is an alias to /src
-import Search from '@/components/Search.vue';
+import SearchMedia from '@/components/Search.vue';
 import PrimeVideoAndNetflixList from '@/components/PrimeVideoAndNetflixList.vue';
 import ProgramListSkeleton from '@/components/ProgramListSkeleton.vue';
 
 import link from '@/helpers/http-common';
 
 export default {
-  name: 'primevideoandnetflix',
+  name: 'prime-video-and-netflix',
   data() {
     return {
       isLoading: false,
@@ -55,7 +55,7 @@ export default {
     };
   },
   components: {
-    Search,
+    SearchMedia,
     PrimeVideoAndNetflixList,
     ProgramListSkeleton,
   },

@@ -1,7 +1,6 @@
 package unogsapi
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -31,7 +30,7 @@ Logger handles logs
 func (h *Handlers) Logger(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		startTime := time.Now()
-		defer h.logger.Printf("request processed in %s\n", time.Now().Sub(startTime))
+		defer h.logger.Printf("request processed in %s\n", time.Since(startTime))
 		next(w, r)
 	}
 }
@@ -43,14 +42,21 @@ func (h *Handlers) HandleSearchByNetflixID(response http.ResponseWriter, request
 	//var program string
 	var url = *request.URL
 	netflixID := url.Query().Get("netflix_id")
-	fmt.Println(netflixID)
-	searchDetails, err := GetNetflixDetails(netflixID)
+
+	ID, err := strconv.Atoi(netflixID)
+	if err != nil {
+		h.logger.Printf("Error getting program details: %v", err.Error())
+		format.Send(response, http.StatusBadRequest, format.Message(false, "Error getting program details", nil))
+		return
+	}
+
+	searchDetails, err := GetNetflixTitleDetails(ID)
 	if err != nil {
 		h.logger.Printf("Error getting program details: %v", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error getting program details", nil))
 		return
 	}
-	format.Send(response, http.StatusOK, format.Message(true, "Program Details", searchDetails.RESULT))
+	format.Send(response, http.StatusOK, format.Message(true, "Program Details", searchDetails))
 
 }
 
@@ -64,21 +70,14 @@ func (h *Handlers) HandleSearchByTitle(response http.ResponseWriter, request *ht
 	title := url.Query().Get("title")
 	skip, _ := strconv.Atoi(url.Query().Get("skip"))
 	limit, _ := strconv.Atoi(url.Query().Get("limit"))
-	if skip <= 0 {
-		err := UNOGSAdvanceSearch(title)
-		if err != nil {
-			h.logger.Printf("Error getting program details: %v", err.Error())
-			format.Send(response, http.StatusInternalServerError, format.Message(false, "Error getting program details", nil))
-			return
-		}
-	}
 
-	searchResults, err := GetNetflixDetailsForAdvanceSearchResults(skip, limit)
+	searchResults, err := TitleDetailsSearch(title, skip, limit)
 	if err != nil {
 		h.logger.Printf("Error getting program details: %v", err.Error())
 		format.Send(response, http.StatusInternalServerError, format.Message(false, "Error getting program details", nil))
 		return
 	}
+
 	format.Send(response, http.StatusOK, format.Message(true, "Program Details", searchResults))
 
 }

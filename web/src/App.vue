@@ -1,23 +1,23 @@
 <template>
   <v-app>
-    <Header/>
-    <v-content>
+    <AppHeader/>
+    <v-main>
       <router-view></router-view>
-    </v-content>
-    <Footer/>
+    </v-main>
+    <AppFooter/>
   </v-app>
 </template>
 
 <script>
-import Header from './components/Header.vue';
-import Footer from './components/Footer.vue';
+import AppHeader from './components/Header.vue';
+import AppFooter from './components/Footer.vue';
 
 export default {
   name: 'App',
 
   components: {
-    Header,
-    Footer,
+    AppHeader,
+    AppFooter,
   },
 
   data: () => ({
