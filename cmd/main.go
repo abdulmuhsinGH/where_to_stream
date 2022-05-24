@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"where_to_stream/pkg/server"
 	"where_to_stream/pkg/unogsapi"
@@ -27,6 +28,9 @@ func main() {
 
 	utelly := utellyapi.NewHandlers(logger)
 	unogs := unogsapi.NewHandlers(logger)
+
+	fs := http.FileServer(http.Dir("where_to_stream/web/dist"))
+	http.Handle("/", fs)
 
 	router := mux.NewRouter()
 	utelly.SetupRoutes(router)
